@@ -5,6 +5,6 @@
 #define tn 1.0
 #define u0 1.0
 #define TAU 0.001
-#define COEFF (10) 
+#define COEFF (1.2) 
 
 #endif
