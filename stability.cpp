@@ -38,6 +38,6 @@ int main() {
     }
 
     fout.close();
-    cout << "Готово! Данные сохранены в stability_region_order3.csv" << endl;
+    cout << "Данные сохранены в stability_region_order3.csv" << endl;
     return 0;
 }

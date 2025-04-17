@@ -11,20 +11,58 @@ def f(t,u):
 def func(u0, h, t_range):
     """Возвращает истинные значения u(t) на равномерной сетке."""
     t_vals = np.arange(t_range[0], t_range[1] + h, h)
-    sol = solve_ivp(f, t_range, [u0], t_eval=t_vals, method='RK45')
+    sol = solve_ivp(f, t_range, [u0], t_eval=t_vals, method='RK45',atol=1e-12, rtol=1e-12)
     return sol.y[0]
 
-if __name__ == "__main__":
-    df = pd.read_csv('data.txt', header=None, names=['time', 'u_val'])
+def exact(u0, h, t_range):
+    """Возвращает истинные значения u(t) на равномерной сетке."""
+    t_vals = np.arange(t_range[0], t_range[1] + h, h)
+    sol = solve_ivp(f, t_range, [u0], t_eval=t_vals, method='RK45',atol=1e-12, rtol=1e-12)
+    return sol.y[0][-1]
 
-    p_appr = df['time'][0]
-    t = df['time'][1:]
-    u = df['u_val'][1:]
+if __name__ == "__main__":
+    df_h = pd.read_csv('data_u_h.txt', header=None, names=['time', 'u_val'])
+    t = df_h['time']
+    u_h = df_h['u_val']
+
+    df_h_2 = pd.read_csv('data_u_h_2.txt', header=None, names=['time', 'u_val'])
+    u_h_2 = df_h_2['u_val']
+    df_h_4 = pd.read_csv('data_u_h_4.txt', header=None, names=['time', 'u_val'])
+    u_h_4 = df_h_4['u_val']
 
     true_vals = func(u0, TAU, (t0, tn))
+
+    u_exact = exact(u0, TAU, (t0, tn))
+    errors = [
+        abs(u_h.iloc[-1] - u_exact),
+        abs(u_h_2.iloc[-1] - u_exact),
+        abs(u_h_4.iloc[-1] - u_exact)
+    ]
+    hs = [ 
+        TAU,
+        TAU / 2,
+        TAU / 4
+    ]
+    u_approx = [ 
+        u_h.iloc[-1],
+        u_h_2.iloc[-1],
+        u_h_4.iloc[-1]
+    ]
+    # Оценка порядка
+    p1 = np.log2(errors[0] / errors[1])
+    p2 = np.log2(errors[1] / errors[2])
+
+    print(f"Точное значение u(1) ≈ {u_exact:.8f}")
+    for h, u, e in zip(hs, u_approx, errors):
+        print(f"h = {h:<6} | u_h = {u:.8f} | error = {e:.2e}")
+
+    print(f"\nОценка порядка сходимости:")
+    print(f"p ≈ log2(E(h)/E(h/2)) = {p1:.4f}")
+    print(f"p ≈ log2(E(h/2)/E(h/4)) = {p2:.4f}")
+
     plt.figure(figsize=(14, 7.5))  
     plt.title("Решение задачи Коши", fontsize=14, weight='bold')
-    plt.plot(t, u, label=f"Метод Адамса-Мултона, tau = {TAU}, du/dt = {COEFF}u, p_appr = {p_appr} ", marker="o", linewidth=0.1)
+    plt.plot(t, u_h, label=f"Метод Адамса-Мултона, tau = {TAU}, du/dt = {COEFF}u", marker="o", linewidth=0.1)
     plt.plot(t, true_vals, label="Истинное решение, fsolve", linestyle="-")
     plt.xlabel("t",fontsize=12)
     plt.ylabel("u(t)",fontsize=12)
