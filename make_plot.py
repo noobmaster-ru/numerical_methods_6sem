@@ -38,11 +38,7 @@ if __name__ == "__main__":
         abs(u_h_2.iloc[-1] - u_exact),
         abs(u_h_4.iloc[-1] - u_exact)
     ]
-    hs = [ 
-        TAU,
-        TAU / 2,
-        TAU / 4
-    ]
+    hs = [ TAU, TAU / 2, TAU / 4 ]
     u_approx = [ 
         u_h.iloc[-1],
         u_h_2.iloc[-1],
@@ -51,18 +47,19 @@ if __name__ == "__main__":
     # Оценка порядка
     p1 = np.log2(errors[0] / errors[1])
     p2 = np.log2(errors[1] / errors[2])
-
+    p = np.log2((u_approx[0]-u_approx[1])/(u_approx[1] -u_approx[2]))
     print(f"Точное значение u(1) ≈ {u_exact:.8f}")
     for h, u, e in zip(hs, u_approx, errors):
-        print(f"h = {h:<6} | u_h = {u:.8f} | error = {e:.2e}")
+        print(f"h = {h:.8f} | u_h = {u:.8f} | error = {e:.8f}")
 
     print(f"\nОценка порядка сходимости:")
-    print(f"p ≈ log2(E(h)/E(h/2)) = {p1:.4f}")
-    print(f"p ≈ log2(E(h/2)/E(h/4)) = {p2:.4f}")
+    print(f"p1 ≈ log2(E(h)/E(h/2)) = {p1:.8f}")
+    print(f"p2 ≈ log2(E(h/2)/E(h/4)) = {p2:.8f}")
+    print(f"p ≈ {p:.8f}")
 
     plt.figure(figsize=(14, 7.5))  
     plt.title("Решение задачи Коши", fontsize=14, weight='bold')
-    plt.plot(t, u_h, label=f"Метод Адамса-Мултона, tau = {TAU}, du/dt = {COEFF}u", marker="o", linewidth=0.1)
+    plt.plot(t, u_h, label=f"Метод Адамса-Мултона, tau = {TAU}, du/dt = {COEFF}u, p ≈ {p1:.3f}", marker="o", linewidth=0.1)
     plt.plot(t, true_vals, label="Истинное решение, fsolve", linestyle="-")
     plt.xlabel("t",fontsize=12)
     plt.ylabel("u(t)",fontsize=12)
